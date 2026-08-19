@@ -12,13 +12,24 @@ def calculate_demographic_data(print_data=True):
         "native-country", "salary"
     ]
 
-    # How many of each race are represented in this dataset?
+    # Convert numeric columns to numbers
+    numeric_columns = [
+        "age", "fnlwgt", "education-num",
+        "capital-gain", "capital-loss", "hours-per-week"
+    ]
+
+    for column in numeric_columns:
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+
+    # Number of each race
     race_count = df["race"].value_counts()
 
-    # What is the average age of men?
-    average_age_men = round(df[df["sex"] == "Male"]["age"].mean(), 1)
+    # Average age of men
+    average_age_men = round(
+        df[df["sex"] == "Male"]["age"].mean(), 1
+    )
 
-    # What is the percentage of people who have a Bachelor's degree?
+    # Percentage with Bachelor's degree
     percentage_bachelors = round(
         (df["education"] == "Bachelors").mean() * 100, 1
     )
@@ -30,34 +41,37 @@ def calculate_demographic_data(print_data=True):
 
     lower_education = ~higher_education
 
-    # Percentage with salary >50K
+    # Percentage of advanced education earners >50K
     higher_education_rich = round(
         (df.loc[higher_education, "salary"] == ">50K").mean() * 100, 1
     )
 
+    # Percentage of non-advanced education earners >50K
     lower_education_rich = round(
         (df.loc[lower_education, "salary"] == ">50K").mean() * 100, 1
     )
 
-    # Minimum number of hours worked per week
+    # Minimum hours worked
     min_work_hours = df["hours-per-week"].min()
 
-    # Percentage of people working minimum hours who earn >50K
+    # People working minimum hours
     num_min_workers = df["hours-per-week"] == min_work_hours
 
     rich_percentage = round(
         (df.loc[num_min_workers, "salary"] == ">50K").mean() * 100, 1
     )
 
-    # Country with highest percentage of people earning >50K
+    # Country with highest percentage earning >50K
     country_data = df.groupby("native-country")["salary"].apply(
         lambda x: (x == ">50K").mean() * 100
     )
 
     highest_earning_country = country_data.idxmax()
-    highest_earning_country_percentage = round(country_data.max(), 1)
+    highest_earning_country_percentage = round(
+        country_data.max(), 1
+    )
 
-    # Most popular occupation for people in India earning >50K
+    # Most popular occupation in India earning >50K
     india_rich = df[
         (df["native-country"] == "India") &
         (df["salary"] == ">50K")
@@ -84,7 +98,10 @@ def calculate_demographic_data(print_data=True):
             f"Percentage of rich among those who work fewest hours: "
             f"{rich_percentage}%"
         )
-        print("Country with highest percentage of rich:", highest_earning_country)
+        print(
+            "Country with highest percentage of rich:",
+            highest_earning_country
+        )
         print(
             f"Highest percentage of rich people in country: "
             f"{highest_earning_country_percentage}%"
@@ -92,15 +109,15 @@ def calculate_demographic_data(print_data=True):
         print("Top occupations in India:", top_IN_occupation)
 
     return {
-        'race_count': race_count,
-        'average_age_men': average_age_men,
-        'percentage_bachelors': percentage_bachelors,
-        'higher_education_rich': higher_education_rich,
-        'lower_education_rich': lower_education_rich,
-        'min_work_hours': min_work_hours,
-        'rich_percentage': rich_percentage,
-        'highest_earning_country': highest_earning_country,
-        'highest_earning_country_percentage':
-        highest_earning_country_percentage,
-        'top_IN_occupation': top_IN_occupation
+        "race_count": race_count,
+        "average_age_men": average_age_men,
+        "percentage_bachelors": percentage_bachelors,
+        "higher_education_rich": higher_education_rich,
+        "lower_education_rich": lower_education_rich,
+        "min_work_hours": min_work_hours,
+        "rich_percentage": rich_percentage,
+        "highest_earning_country": highest_earning_country,
+        "highest_earning_country_percentage":
+            highest_earning_country_percentage,
+        "top_IN_occupation": top_IN_occupation
     }
